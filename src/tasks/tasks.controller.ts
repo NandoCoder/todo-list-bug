@@ -1,22 +1,30 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { TasksService } from './tasks.service';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('tasks')
 export class TasksController {
     constructor(private readonly tasksService: TasksService) {}
 
+    @UseGuards(AuthGuard)
     @Get('')
     async listTasks() {
         return this.tasksService.listTasks();
     }
 
+    @UseGuards(AuthGuard)
     @Get('/:id')
-    async getTask(@Param('id') id: string) {
-        return this.tasksService.getTask(id);
+    async getTask(@Param('id') id: string, @Request() req) {
+        const userId = req.user.id
+
+        return this.tasksService.getTask(id,userId);
     }
 
+    @UseGuards(AuthGuard)
     @Post('/edit')
-    async editTask(@Body() body) {
-        return this.tasksService.editTask(body);
+    async editTask(@Body() body, @Request() req) {
+        const userId = req.user.id
+
+        return this.tasksService.editTask(body, userId);
     }
 }
